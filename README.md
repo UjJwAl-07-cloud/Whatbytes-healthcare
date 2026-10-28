@@ -547,4 +547,4 @@ WhatBytes Full Stack Intern Assignment
 
 ---
 
-*Built with ❤️ using React, Node.js, Express, PostgreSQL, and Prisma*
+*Built using React, Node.js, Express, PostgreSQL, and Prisma*
