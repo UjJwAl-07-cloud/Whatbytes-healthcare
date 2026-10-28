@@ -285,8 +285,8 @@ VITE_API_BASE_URL=http://localhost:5000/api
 ### 1. Clone the repository
 
 ```bash
-git clone <repository-url>
-cd whatbytes-healthcare
+git clone https://github.com/UjJwAl-07-cloud/Whatbytes-healthcare.git
+cd Whatbytes-healthcare
 ```
 
 ### 2. Install dependencies
