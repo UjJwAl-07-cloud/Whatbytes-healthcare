@@ -6,12 +6,6 @@ A full-stack healthcare management application built as part of the WhatBytes Fu
 
 **[🚀 Open WhatBytes Healthcare](https://whatbytes-healthcare.vercel.app)**
 
-| Resource | Link |
-|---|---|
-| **Live Application** | [whatbytes-healthcare.vercel.app](https://whatbytes-healthcare.vercel.app) |
-| **Backend API** | [whatbytes-healthcare-api.onrender.com](https://whatbytes-healthcare-api.onrender.com) |
-| **API Health Check** | [Check API Status](https://whatbytes-healthcare-api.onrender.com/api/health) |
-
 ### ✨ What You Can Do
 
 - 🔐 Register and log in securely using JWT authentication
