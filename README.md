@@ -2,6 +2,28 @@
 
 A full-stack healthcare management application built as part of the WhatBytes Full Stack Intern assignment. The application allows users to register, log in, and manage patient records, doctor records, and patient-doctor assignments through a modern web interface backed by a RESTful API.
 
+## 🌐 Live Demo
+
+**[🚀 Open WhatBytes Healthcare](https://whatbytes-healthcare.vercel.app)**
+
+| Resource | Link |
+|---|---|
+| **Live Application** | [whatbytes-healthcare.vercel.app](https://whatbytes-healthcare.vercel.app) |
+| **Backend API** | [whatbytes-healthcare-api.onrender.com](https://whatbytes-healthcare-api.onrender.com) |
+| **API Health Check** | [Check API Status](https://whatbytes-healthcare-api.onrender.com/api/health) |
+
+### ✨ What You Can Do
+
+- 🔐 Register and log in securely using JWT authentication
+- 🧑‍⚕️ Create and manage patient records
+- 🩺 Browse and manage doctors
+- 🔗 Assign doctors to patients and manage mappings
+- 📊 View dashboard statistics and recent patients
+
+**Tech Stack:** React · Vite · Node.js · Express · Prisma · PostgreSQL
+
+> **Note:** The live application uses a hosted database. Please use demo data only and avoid entering real patient or medical information.
+
 ## 📋 Assignment Objectives
 
 - Build a backend system for a healthcare application
