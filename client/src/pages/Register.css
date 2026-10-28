@@ -1,0 +1,12 @@
+.register-page h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 4px;
+}
+
+.register-page .subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0 0 24px;
+}

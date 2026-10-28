@@ -1,0 +1,57 @@
+.notification-bar {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 3000;
+  min-width: 320px;
+  max-width: 480px;
+  padding: 14px 20px;
+  border-radius: var(--radius-md);
+  color: #ffffff;
+  font-size: 13.5px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow-lg);
+  animation: slideInRight 0.25s ease;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.notification-bar.success {
+  background: var(--success);
+}
+
+.notification-bar.error {
+  background: var(--danger);
+}
+
+.notification-bar.info {
+  background: var(--primary);
+}
+
+.notification-bar .notif-message {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.notification-bar .notif-close {
+  background: none;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  opacity: 0.85;
+  transition: opacity 0.15s, background-color 0.15s;
+}
+
+.notification-bar .notif-close:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.15);
+}

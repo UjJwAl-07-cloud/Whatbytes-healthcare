@@ -1,0 +1,637 @@
+{
+  "info": {
+    "name": "WhatBytes Healthcare API",
+    "description": "Complete API collection for the WhatBytes Healthcare Management application.\n\n## Setup\n1. Start the backend server on http://localhost:5000\n2. Set the `baseUrl` variable if using a different port\n3. Run 'Register User' first, then 'Login User' to get a token\n4. The login request automatically sets the `authToken` variable\n5. Use the remaining endpoints in order\n\n## Authentication\nAll endpoints except Register and Login require a Bearer token.\nThe token is automatically set after a successful login.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "patientId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "doctorId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "mappingId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "description": "User registration and login endpoints",
+      "item": [
+        {
+          "name": "1.1 Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register/",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register", ""]
+            },
+            "description": "Register a new user. Returns user info (without password).\n\nExpected: 201 Created"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"success\": true,\n  \"message\": \"User registered successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "1.2 Register User - Duplicate Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register/",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register", ""]
+            },
+            "description": "Attempt to register with an existing email.\n\nExpected: 409 Conflict"
+          },
+          "response": [
+            {
+              "name": "Duplicate Email",
+              "status": "Conflict",
+              "code": 409,
+              "body": "{\n  \"success\": false,\n  \"message\": \"A user with this email already exists\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "1.3 Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('authToken', jsonData.data.token);",
+                  "    console.log('Token saved successfully');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login/",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login", ""]
+            },
+            "description": "Login with valid credentials. The token is automatically stored in the collection variable `authToken`.\n\nExpected: 200 OK"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"token\": \"eyJhbGciOiJIUzI1NiIs...\",\n    \"user\": {\n      \"id\": 1,\n      \"name\": \"John Doe\",\n      \"email\": \"john@example.com\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "1.4 Login User - Invalid Credentials",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"wrongpassword\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login/",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login", ""]
+            },
+            "description": "Attempt login with wrong password.\n\nExpected: 401 Unauthorized"
+          },
+          "response": [
+            {
+              "name": "Invalid Credentials",
+              "status": "Unauthorized",
+              "code": 401,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Invalid email or password\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Patient Management",
+      "description": "CRUD operations for patients. All endpoints require authentication.",
+      "item": [
+        {
+          "name": "2.1 Create Patient",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('patientId', jsonData.data.id);",
+                  "    console.log('Patient ID saved: ' + jsonData.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Smith\",\n  \"age\": 35,\n  \"gender\": \"Female\",\n  \"address\": \"123 Health Street, Medical City\",\n  \"phone\": \"+1-555-0101\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/patients/",
+              "host": ["{{baseUrl}}"],
+              "path": ["patients", ""]
+            },
+            "description": "Create a new patient. The patient is automatically linked to the authenticated user.\n\nExpected: 201 Created"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Patient created successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Jane Smith\",\n    \"age\": 35,\n    \"gender\": \"Female\",\n    \"address\": \"123 Health Street, Medical City\",\n    \"phone\": \"+1-555-0101\",\n    \"userId\": 1,\n    \"createdAt\": \"2026-10-28T00:00:00.000Z\",\n    \"updatedAt\": \"2026-10-28T00:00:00.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "2.2 Get All Patients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patients/",
+              "host": ["{{baseUrl}}"],
+              "path": ["patients", ""]
+            },
+            "description": "Get all patients belonging to the authenticated user.\n\nExpected: 200 OK"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Jane Smith\",\n      \"age\": 35,\n      \"gender\": \"Female\",\n      \"address\": \"123 Health Street\",\n      \"phone\": \"+1-555-0101\",\n      \"userId\": 1,\n      \"createdAt\": \"2026-10-28T00:00:00.000Z\",\n      \"updatedAt\": \"2026-10-28T00:00:00.000Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "2.3 Get Patient by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patients/{{patientId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["patients", "{{patientId}}", ""]
+            },
+            "description": "Get details of a specific patient. Only the owner can access.\n\nExpected: 200 OK"
+          },
+          "response": []
+        },
+        {
+          "name": "2.4 Update Patient",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Smith-Updated\",\n  \"age\": 36,\n  \"gender\": \"Female\",\n  \"address\": \"456 Updated Ave, Medical City\",\n  \"phone\": \"+1-555-0202\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/patients/{{patientId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["patients", "{{patientId}}", ""]
+            },
+            "description": "Update a patient. Only the owner can update.\n\nExpected: 200 OK"
+          },
+          "response": []
+        },
+        {
+          "name": "2.5 Delete Patient",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patients/{{patientId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["patients", "{{patientId}}", ""]
+            },
+            "description": "Delete a patient and all associated mappings. Only the owner can delete.\n\nExpected: 204 No Content"
+          },
+          "response": []
+        },
+        {
+          "name": "2.6 Create Patient - No Auth",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Unauthorized Patient\",\n  \"age\": 30,\n  \"gender\": \"Male\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/patients/",
+              "host": ["{{baseUrl}}"],
+              "path": ["patients", ""]
+            },
+            "description": "Attempt to create a patient without authentication.\n\nExpected: 401 Unauthorized"
+          },
+          "response": []
+        },
+        {
+          "name": "2.7 Create Patient - Validation Error",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"age\": -5,\n  \"gender\": \"InvalidGender\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/patients/",
+              "host": ["{{baseUrl}}"],
+              "path": ["patients", ""]
+            },
+            "description": "Attempt to create a patient with invalid data.\n\nExpected: 400 Bad Request with validation errors"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Doctor Management",
+      "description": "CRUD operations for doctors. All endpoints require authentication.",
+      "item": [
+        {
+          "name": "3.1 Create Doctor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('doctorId', jsonData.data.id);",
+                  "    console.log('Doctor ID saved: ' + jsonData.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dr. Sarah Johnson\",\n  \"specialization\": \"Cardiology\",\n  \"email\": \"sarah.johnson@hospital.com\",\n  \"phone\": \"+1-555-0301\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/doctors/",
+              "host": ["{{baseUrl}}"],
+              "path": ["doctors", ""]
+            },
+            "description": "Create a new doctor record.\n\nExpected: 201 Created"
+          },
+          "response": []
+        },
+        {
+          "name": "3.2 Get All Doctors",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/doctors/",
+              "host": ["{{baseUrl}}"],
+              "path": ["doctors", ""]
+            },
+            "description": "Get all available doctors.\n\nExpected: 200 OK"
+          },
+          "response": []
+        },
+        {
+          "name": "3.3 Get Doctor by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/doctors/{{doctorId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["doctors", "{{doctorId}}", ""]
+            },
+            "description": "Get details of a specific doctor.\n\nExpected: 200 OK"
+          },
+          "response": []
+        },
+        {
+          "name": "3.4 Update Doctor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dr. Sarah Johnson\",\n  \"specialization\": \"Interventional Cardiology\",\n  \"email\": \"sarah.johnson@hospital.com\",\n  \"phone\": \"+1-555-0302\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/doctors/{{doctorId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["doctors", "{{doctorId}}", ""]
+            },
+            "description": "Update a doctor's details.\n\nExpected: 200 OK"
+          },
+          "response": []
+        },
+        {
+          "name": "3.5 Delete Doctor",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/doctors/{{doctorId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["doctors", "{{doctorId}}", ""]
+            },
+            "description": "Delete a doctor and all associated mappings.\n\nExpected: 204 No Content"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Patient-Doctor Mappings",
+      "description": "Assign and manage patient-doctor relationships. All endpoints require authentication.",
+      "item": [
+        {
+          "name": "4.1 Create Mapping",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('mappingId', jsonData.data.id);",
+                  "    console.log('Mapping ID saved: ' + jsonData.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": {{patientId}},\n  \"doctorId\": {{doctorId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mappings/",
+              "host": ["{{baseUrl}}"],
+              "path": ["mappings", ""]
+            },
+            "description": "Assign a doctor to a patient. The patient must belong to the authenticated user.\n\nExpected: 201 Created"
+          },
+          "response": []
+        },
+        {
+          "name": "4.2 Create Mapping - Duplicate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": {{patientId}},\n  \"doctorId\": {{doctorId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mappings/",
+              "host": ["{{baseUrl}}"],
+              "path": ["mappings", ""]
+            },
+            "description": "Attempt to create a duplicate mapping.\n\nExpected: 409 Conflict"
+          },
+          "response": []
+        },
+        {
+          "name": "4.3 Get All Mappings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/mappings/",
+              "host": ["{{baseUrl}}"],
+              "path": ["mappings", ""]
+            },
+            "description": "Get all mappings for the authenticated user's patients.\n\nExpected: 200 OK"
+          },
+          "response": []
+        },
+        {
+          "name": "4.4 Get Doctors for Patient",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/mappings/{{patientId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["mappings", "{{patientId}}", ""]
+            },
+            "description": "Get all doctors assigned to a specific patient. The patient must belong to the authenticated user.\n\nExpected: 200 OK"
+          },
+          "response": []
+        },
+        {
+          "name": "4.5 Delete Mapping",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/mappings/{{mappingId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["mappings", "{{mappingId}}", ""]
+            },
+            "description": "Remove a patient-doctor mapping. Only the patient's owner can remove the mapping.\n\nExpected: 204 No Content"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
